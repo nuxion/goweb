@@ -23,6 +23,10 @@ func main() {
 	proxy := NewMultipleHostReverseProxy([]*url.URL{
 		{
 			Scheme: "http",
+			Host:   "localhost:8080",
+		},
+		{
+			Scheme: "http",
 			Host:   "localhost:8081",
 		},
 	})
