@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/nuxion/goweb/pkg/config"
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 )
@@ -64,6 +65,18 @@ func NewMultipleHostReverseProxy(targets []*url.URL) *httputil.ReverseProxy {
 
 	}
 	return &httputil.ReverseProxy{Director: director}
+
+}
+
+// NewProxy creates Proxy server
+func NewProxy(s *config.Service) {
+	var urls [len(s.Hosts)]*url.URL
+	for i, e := range s.Hosts {
+		urls[i] = *url.URL{Scheme: s.Proto, Host: e}
+	}
+
+	proxy := NewMultipleHostReverseProxy(*urls)
+	log.Fatal(http.ListenAndServe(":9090", proxy))
 
 }
 

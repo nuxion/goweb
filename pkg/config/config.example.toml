@@ -1,0 +1,4 @@
+[services]
+  [services.httpserver]
+  hosts = ["localhost:8081", "localhost:8082"]
+  proto = "http"
