@@ -57,4 +57,16 @@ https://stackoverflow.com/questions/32154712/go-lang-capture-redirect-urls-and-s
 
 ## LOG
 https://www.datadoghq.com/blog/go-logging/
-https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7
+https://gist.github.com/enricofoltran/10b4a980cd07cb02836f70a4ab3e72d7 
+
+Very detailed list about how to abstract logging
+https://www.mountedthoughts.com/golang-logger-interface/
+
+## code style
+https://talks.golang.org/2014/names.slide#12
+
+## Headers
+https://www.nginx.com/resources/wiki/start/topics/examples/forwarded/
+
+## roundtrip deeper
+https://lanre.wtf/blog/2017/07/24/roundtripper-go/

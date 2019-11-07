@@ -1,9 +1,9 @@
-package main
+package httpserver
 
 import (
 	"fmt"
 	"net/http"
-	"flag"
+	"net/http/httputil"
 	"os"
 
 	"github.com/julienschmidt/httprouter"
@@ -17,19 +17,19 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 func logHandler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Infof("%s %s %s %s\n", r.RemoteAddr, r.Method, r.URL, r.UserAgent())
+		log.Infof("%s %s %s %s\n", r.RemoteAddr, r.Method, r.URL, r.UserAgent())
+		dump, _ := httputil.DumpRequest(r, true)
+		log.Info(string(dump))
 		handler.ServeHTTP(w, r)
 	})
 }
 
-func main() {
+// Run is the exported instance
+func Run(port string) {
 	router := httprouter.New()
 	router.GET("/", Index)
 	log.SetOutput(os.Stdout)
-	var port string
-	flag.StringVar(&port, "port", "8080", "Listen port")
-	flag.Parse()
 	log.Info("Starting at... :", port)
 	finalPort := fmt.Sprintf(":%s", port)
-		log.Fatal(http.ListenAndServe(finalPort, logHandler(router)))
+	log.Fatal(http.ListenAndServe(finalPort, logHandler(router)))
 }
