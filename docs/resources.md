@@ -70,3 +70,9 @@ https://www.nginx.com/resources/wiki/start/topics/examples/forwarded/
 
 ## roundtrip deeper
 https://lanre.wtf/blog/2017/07/24/roundtripper-go/
+
+https://medium.com/@adiach3nko/package-management-with-go-modules-the-pragmatic-guide-c831b4eaaf31
+
+https://medium.com/@adiach3nko/package-management-with-go-modules-the-pragmatic-guide-c831b4eaaf31 
+
+https://medium.com/dm03514-tech-blog/sre-debugging-simple-memory-leaks-in-go-e0a9e6d63d4d

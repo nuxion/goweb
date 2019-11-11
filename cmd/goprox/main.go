@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/nuxion/goweb/pkg/config"
 	"github.com/nuxion/goweb/pkg/proxy"
 	"github.com/sirupsen/logrus"
 )
@@ -16,6 +17,7 @@ func init() {
 }
 
 func main() {
+	conf, _ := config.LoadTom("config.example.toml")
 	logrus.Info("MAIN")
-	proxy.Proxy()
+	proxy.Run(conf)
 }

@@ -53,7 +53,10 @@ func NewMultipleHostReverseProxy(targets []*url.URL) *httputil.ReverseProxy {
 		r.Header.Add("X-Request-ID", guid.String())
 		r.URL.Scheme = target.Scheme
 		r.URL.Host = target.Host
-		r.URL.Path = target.Path
+		// log.Info("Original path ", r.URL.Path)
+		// r.URL.Path = target.Path
+		// log.Info("Target path ", target.Path)
+		// log.Info("Target host ", target.Host)
 		log.Info("RemoteAddr: ", r.RemoteAddr)
 		dump, _ := httputil.DumpRequest(r, true)
 		log.Info(string(dump))
@@ -68,15 +71,16 @@ func NewMultipleHostReverseProxy(targets []*url.URL) *httputil.ReverseProxy {
 
 }
 
-// NewProxy creates Proxy server
-func NewProxy(s *config.Service) {
-	var urls [len(s.Hosts)]*url.URL
+// prepareUrls by service
+func prepareUrls(s *config.Service) []*url.URL {
+	// var urls [len(s.Hosts)]*url.URL
+	lenght := len(s.Hosts)
+	urls := make([]*url.URL, lenght)
 	for i, e := range s.Hosts {
-		urls[i] = *url.URL{Scheme: s.Proto, Host: e}
+		urls[i] = &url.URL{Scheme: s.Proto, Host: e}
 	}
 
-	proxy := NewMultipleHostReverseProxy(*urls)
-	log.Fatal(http.ListenAndServe(":9090", proxy))
+	return urls
 
 }
 
@@ -92,5 +96,13 @@ func Proxy() {
 			Host:   "localhost:8081",
 		},
 	})
+	log.Fatal(http.ListenAndServe(":9090", proxy))
+}
+
+// Run new main function to run proxy
+func Run(c *config.Config) {
+	service := c.Services["httpserver"]
+	u := prepareUrls(&service)
+	proxy := NewMultipleHostReverseProxy(u)
 	log.Fatal(http.ListenAndServe(":9090", proxy))
 }
