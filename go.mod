@@ -10,4 +10,5 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/sys v0.0.0-20191105231009-c1f44814a5cd // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0
 )

@@ -1,4 +1,6 @@
+https://blog.semanticart.com/2013/11/11/a-proper-api-proxy-written-in-go/
 
+look at this
 ## podcast
 https://changelog.com/podcast/100
 
@@ -76,3 +78,5 @@ https://medium.com/@adiach3nko/package-management-with-go-modules-the-pragmatic-
 https://medium.com/@adiach3nko/package-management-with-go-modules-the-pragmatic-guide-c831b4eaaf31 
 
 https://medium.com/dm03514-tech-blog/sre-debugging-simple-memory-leaks-in-go-e0a9e6d63d4d
+#Working example proxy
+https://github.com/geosoft1/reverseproxy

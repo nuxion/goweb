@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/nuxion/goweb/pkg/config"
+	//"github.com/nuxion/goweb/pkg/ratelimiter"
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 )
@@ -104,5 +105,6 @@ func Run(c *config.Config) {
 	service := c.Services["httpserver"]
 	u := prepareUrls(&service)
 	proxy := NewMultipleHostReverseProxy(u)
+	//handler := ratelimiter.SimpleLimiter(proxy)
 	log.Fatal(http.ListenAndServe(":9090", proxy))
 }
