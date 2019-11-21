@@ -27,11 +27,11 @@ var mu sync.Mutex
 }*/
 
 func addVisitor(ip string) *rate.Limiter {
-	limiter := rate.NewLimiter(1, 3)
-	mu.Lock()
+	limiter := rate.NewLimiter(2, 1)
+	//mu.Lock()
 	// Include the current time when creating a new visitor.
 	visitors[ip] = &visitor{limiter, time.Now()}
-	mu.Unlock()
+	//mu.Unlock()
 	return limiter
 }
 
@@ -77,7 +77,10 @@ func SimpleLimiter(next http.Handler) http.Handler {
 		}
 
 		limiter := getVisitor(ip)
+		log.Info("after visitor")
+		log.Info(limiter.Limit())
 		if limiter.Allow() == false {
+			log.Error("Not Allowed")
 			http.Error(w, http.StatusText(429), http.StatusTooManyRequests)
 			return
 		}

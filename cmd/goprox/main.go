@@ -17,7 +17,7 @@ func init() {
 }
 
 func main() {
-	conf, _ := config.LoadTom("config.example.toml")
+	conf, _ := config.LoadTom("/home/nuxion/Prototyping/goweb/config.example.toml")
 	logrus.Info("MAIN")
 	proxy.Run(conf)
 }

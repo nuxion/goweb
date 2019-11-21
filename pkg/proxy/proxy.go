@@ -4,13 +4,13 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"strings"
 
 	"github.com/nuxion/goweb/pkg/config"
-	//"github.com/nuxion/goweb/pkg/ratelimiter"
+	limiter "github.com/nuxion/goweb/pkg/ratelimiter"
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 )
@@ -48,21 +48,18 @@ func NewMultipleHostReverseProxy(targets []*url.URL) *httputil.ReverseProxy {
 	director := func(r *http.Request) {
 
 		target := targets[rand.Int()%len(targets)]
-		/*r.Header.Add("X-Forwarded-Host", r.Host)
-		r.Header.Add("X-Origin-Host", target.Host)*/
 		guid := xid.New()
 		r.Header.Add("X-Request-ID", guid.String())
 		r.URL.Scheme = target.Scheme
 		r.URL.Host = target.Host
-		// log.Info("Original path ", r.URL.Path)
-		// r.URL.Path = target.Path
-		// log.Info("Target path ", target.Path)
-		// log.Info("Target host ", target.Host)
 		log.Info("RemoteAddr: ", r.RemoteAddr)
 		dump, _ := httputil.DumpRequest(r, true)
 		log.Info(string(dump))
-		// FIXME only works for IPV4
-		cIP := strings.Split(r.RemoteAddr, ":")[0]
+		cIP, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 		log.Debug("RemoteIP: ", cIP)
 		client := NewClient(cIP, r.UserAgent())
 		log.Debug("ClientID hash: ", client.hash)
@@ -100,11 +97,20 @@ func Proxy() {
 	log.Fatal(http.ListenAndServe(":9090", proxy))
 }
 
+func logH(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Before")
+		h.ServeHTTP(w, r) // call original
+		log.Println("After")
+	})
+}
+
 // Run new main function to run proxy
 func Run(c *config.Config) {
 	service := c.Services["httpserver"]
 	u := prepareUrls(&service)
 	proxy := NewMultipleHostReverseProxy(u)
+	http.Handle("/", limiter.SimpleLimiter(proxy))
 	//handler := ratelimiter.SimpleLimiter(proxy)
-	log.Fatal(http.ListenAndServe(":9090", proxy))
+	log.Fatal(http.ListenAndServe(":9090", nil))
 }
