@@ -1,3 +1,4 @@
 .editorconfig
 bin/*
 .vscode/*
+tags

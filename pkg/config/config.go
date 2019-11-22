@@ -9,6 +9,7 @@ import (
 
 // Config object
 type Config struct {
+	Port     string
 	Services map[string]Service
 }
 

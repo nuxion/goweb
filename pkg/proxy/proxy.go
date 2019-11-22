@@ -110,7 +110,9 @@ func Run(c *config.Config) {
 	service := c.Services["httpserver"]
 	u := prepareUrls(&service)
 	proxy := NewMultipleHostReverseProxy(u)
+	listenAddress := ":"
+	listenAddress += c.Port
 	http.Handle("/", limiter.SimpleLimiter(proxy))
 	//handler := ratelimiter.SimpleLimiter(proxy)
-	log.Fatal(http.ListenAndServe(":9090", nil))
+	log.Fatal(http.ListenAndServe(listenAddress, nil))
 }

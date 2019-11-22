@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"github.com/nuxion/goweb/pkg/config"
@@ -17,7 +18,14 @@ func init() {
 }
 
 func main() {
-	conf, _ := config.LoadTom("/home/nuxion/Prototyping/goweb/config.example.toml")
-	logrus.Info("MAIN")
+	pathConf := flag.String("cfg", "config.example.toml", "fullpath to config.toml file")
+	listenPort := flag.String("port", "9090", "port where the service will be listening")
+
+	flag.Parse()
+	//var path string = *pathConf
+	conf, _ := config.LoadTom(*pathConf)
+	conf.Port = *listenPort
+	logrus.Info("Ready&Go Executing...")
+	logrus.Debug("Using ", *pathConf)
 	proxy.Run(conf)
 }
