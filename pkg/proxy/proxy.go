@@ -10,7 +10,7 @@ import (
 	"net/url"
 
 	"github.com/nuxion/goweb/pkg/config"
-	//limiter "github.com/nuxion/goweb/pkg/ratelimiter"
+	limiter "github.com/nuxion/goweb/pkg/ratelimiter"
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 )
@@ -93,13 +93,15 @@ func XIDMiddle(h http.Handler) http.Handler {
 func Run(c *config.Config) {
 	mux := http.NewServeMux()
 
+	limit := limiter.NewLimitContext(1, 1)
+
 	service := c.Services["httpserver"]
 	u := prepareUrls(&service)
 	proxy := NewMultipleHostReverseProxy(u)
 	listenAddress := ":"
 	listenAddress += c.Port
 	//mux.Handle("/", limiter.SimpleLimiter(proxy))
-	mux.Handle("/service", proxy)
+	mux.Handle("/service", limit.SimpleLimiter(proxy))
 	//handler := ratelimiter.SimpleLimiter(proxy)
 	log.Fatal(http.ListenAndServe(listenAddress, XIDMiddle(mux)))
 }

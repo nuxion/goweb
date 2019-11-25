@@ -10,6 +10,24 @@ import (
 	"golang.org/x/time/rate"
 )
 
+type LimitContext struct {
+	rLimit rate.Limit
+	burst  int
+}
+
+func (lc *LimitContext) addVisitor(ip string) *rate.Limiter {
+	limiter := rate.NewLimiter(lc.rLimit, lc.burst)
+	//mu.Lock()
+	// Include the current time when creating a new visitor.
+	visitors[ip] = &visitor{limiter, time.Now()}
+	//mu.Unlock()
+	return limiter
+}
+
+func NewLimitContext(r rate.Limit, b int) *LimitContext {
+	return &LimitContext{r, b}
+}
+
 // Create a custom visitor struct which holds the rate limiter for each
 // visitor and the last time that the visitor was seen.
 type visitor struct {
@@ -26,22 +44,13 @@ var mu sync.Mutex
 	go CleanupVisitors()
 }*/
 
-func addVisitor(ip string) *rate.Limiter {
-	limiter := rate.NewLimiter(2, 1)
-	//mu.Lock()
-	// Include the current time when creating a new visitor.
-	visitors[ip] = &visitor{limiter, time.Now()}
-	//mu.Unlock()
-	return limiter
-}
-
-func getVisitor(ip string) *rate.Limiter {
+func (lc *LimitContext) getVisitor(ip string) *rate.Limiter {
 	mu.Lock()
 	defer mu.Unlock()
 
 	v, exists := visitors[ip]
 	if !exists {
-		return addVisitor(ip)
+		return lc.addVisitor(ip)
 	}
 
 	// Update the last seen time for the visitor.
@@ -66,7 +75,7 @@ func CleanupVisitors() {
 }
 
 // SimpleLimiter a lot of improve needed
-func SimpleLimiter(next http.Handler) http.Handler {
+func (lc *LimitContext) SimpleLimiter(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ip, _, err := net.SplitHostPort(r.RemoteAddr)
 		log.Info("Inside SimpleLimiter ", r.RemoteAddr)
@@ -76,7 +85,7 @@ func SimpleLimiter(next http.Handler) http.Handler {
 			return
 		}
 
-		limiter := getVisitor(ip)
+		limiter := lc.getVisitor(ip)
 		log.Info("after visitor")
 		log.Info(limiter.Limit())
 		if limiter.Allow() == false {
