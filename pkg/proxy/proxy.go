@@ -10,7 +10,7 @@ import (
 	"net/url"
 
 	"github.com/nuxion/goweb/pkg/config"
-	limiter "github.com/nuxion/goweb/pkg/ratelimiter"
+	//limiter "github.com/nuxion/goweb/pkg/ratelimiter"
 	"github.com/rs/xid"
 	log "github.com/sirupsen/logrus"
 )
@@ -48,8 +48,6 @@ func NewMultipleHostReverseProxy(targets []*url.URL) *httputil.ReverseProxy {
 	director := func(r *http.Request) {
 
 		target := targets[rand.Int()%len(targets)]
-		guid := xid.New()
-		r.Header.Add("X-Request-ID", guid.String())
 		r.URL.Scheme = target.Scheme
 		r.URL.Host = target.Host
 		log.Info("RemoteAddr: ", r.RemoteAddr)
@@ -82,37 +80,26 @@ func prepareUrls(s *config.Service) []*url.URL {
 
 }
 
-// Proxy main function to run proxy
-func Proxy() {
-	proxy := NewMultipleHostReverseProxy([]*url.URL{
-		{
-			Scheme: "http",
-			Host:   "localhost:8082",
-		},
-		{
-			Scheme: "http",
-			Host:   "localhost:8081",
-		},
-	})
-	log.Fatal(http.ListenAndServe(":9090", proxy))
-}
-
-func logH(h http.Handler) http.Handler {
+func XIDMiddle(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Before")
+		guid := xid.New()
+		r.Header.Add("X-Request-ID", guid.String())
+		log.WithFields(log.Fields{"xid": guid.String()}).Debug("XIDMiddle")
 		h.ServeHTTP(w, r) // call original
-		log.Println("After")
 	})
 }
 
 // Run new main function to run proxy
 func Run(c *config.Config) {
+	mux := http.NewServeMux()
+
 	service := c.Services["httpserver"]
 	u := prepareUrls(&service)
 	proxy := NewMultipleHostReverseProxy(u)
 	listenAddress := ":"
 	listenAddress += c.Port
-	http.Handle("/", limiter.SimpleLimiter(proxy))
+	//mux.Handle("/", limiter.SimpleLimiter(proxy))
+	mux.Handle("/service", proxy)
 	//handler := ratelimiter.SimpleLimiter(proxy)
-	log.Fatal(http.ListenAndServe(listenAddress, nil))
+	log.Fatal(http.ListenAndServe(listenAddress, XIDMiddle(mux)))
 }
