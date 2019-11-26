@@ -1,4 +1,18 @@
-[services]
-  [services.httpserver]
-  hosts = ["localhost:8080"]
-  proto = "http"
+[general]
+port = "9090"
+
+[[service]]
+name = "test"
+path = "/test-service"
+hosts = ["localhost:8080", "localhost:8081"]
+proto = "http"
+limit = 10
+burst = 10
+
+[[service]]
+name = "test2"
+path = "/test2-service"
+hosts = ["localhost:8180", "localhost:8181"]
+proto = "http"
+limit = 10
+burst = 10

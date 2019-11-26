@@ -9,14 +9,23 @@ import (
 
 // Config object
 type Config struct {
-	Port     string
-	Services map[string]Service
+	General General
+	Service []service `toml:"service"`
+}
+
+// General config options
+type General struct {
+	Port string
 }
 
 // Service specification
-type Service struct {
+type service struct {
 	Hosts []string
+	Name  string
+	Path  string
 	Proto string
+	Limit int
+	Burst int
 }
 
 // LoadTom toml file
